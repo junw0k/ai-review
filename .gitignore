@@ -1,0 +1,28 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+
+# 환경 변수 
+.env
+.env.*
+
+# uv 관련
+.uv/
+# 만약 프로젝트 설정을 공유하고 싶지 않다면 아래 포함 (선택사항)
+uv.lock
+
+# OS 관련
+.DS_Store
+Thumbs.db
+
+# IDE 관련 (VS Code 등을 쓴다면)
+.vscode/
+.idea/
