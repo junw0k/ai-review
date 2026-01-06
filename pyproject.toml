@@ -8,5 +8,6 @@ dependencies = [
     "google-genai>=1.56.0",
     "google-generativeai>=0.8.6",
     "openai>=2.14.0",
+    "pygithub>=2.8.1",
     "python-dotenv>=1.2.1",
 ]

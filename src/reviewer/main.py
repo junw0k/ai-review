@@ -1,31 +1,24 @@
 import os
-from google import genai # 새로운 라이브러리 사용
 from dotenv import load_dotenv
+from .github_client import get_pr_diff, post_comment
+from .ai_reviewer import review_code
 
 load_dotenv()
 
-# 클라이언트 설정
-client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
-
-test_diff = """
-def calculate_sum(a, b):
-    result = a + b
-    print(result)
-    return result
-"""
-
-def review_code(code):
-    # 최신 SDK 방식: models.generate
-    response = client.models.generate_content(
-        model="gemini-2.5-flash", 
-        contents=f"You are a professional code reviewer. Review this code:\n{code}"
-    )
-    return response.text
+def main():
+    repo_name = "junw0k/test_review"  # 실제 저장소로 변경
+    pr_number = 1  # 실제 PR 번호로 변경
+    
+    print("Fetching PR...")
+    diff = get_pr_diff(repo_name, pr_number)
+    
+    print("Reviewing...")
+    review = review_code(diff)
+    
+    print("Posting...")
+    post_comment(repo_name, pr_number, review)
+    
+    print("✅ Done!")
 
 if __name__ == "__main__":
-    print("🤖 AI Code Review (Gemini New SDK) Starting...\n")
-    try:
-        review = review_code(test_diff)
-        print(review)
-    except Exception as e:
-        print(f"❌ Error occurred: {e}")
+    main()
