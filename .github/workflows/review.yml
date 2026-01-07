@@ -1,0 +1,28 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install UV
+        uses: astral-sh/setup-uv@v3
+        
+      - name: Setup Python
+        run: uv python install 3.11
+        
+      - name: Install dependencies
+        run: uv sync
+        
+      - name: Run AI Review
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO_NAME: ${{ github.repository }}
+        run: uv run python -m reviewer.main
