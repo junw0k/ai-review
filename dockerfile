@@ -20,4 +20,4 @@ ENV PYTHONPATH="/app/src"
 
 # 7. 실행 명령 (main.py 호출)
 # 주의: Docker 환경이므로 실행 경로를 정확히 지정합니다.
-ENTRYPOINT ["uv", "run", "python", "src/reviewer/main.py"]
+ENTRYPOINT ["uv", "--project", "/app", "run", "python", "/app/src/reviewer/main.py"]
