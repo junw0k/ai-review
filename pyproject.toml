@@ -11,3 +11,6 @@ dependencies = [
     "pygithub>=2.8.1",
     "python-dotenv>=1.2.1",
 ]
+
+[tool.hatchling.build.targets.wheel]
+packages = ["src/reviewer"]
