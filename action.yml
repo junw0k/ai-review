@@ -1,0 +1,22 @@
+name: 'AI Code Reviewer'
+description: 'Google Gemini API를 이용한 자동 코드 리뷰 액션'
+author: 'junw0k'
+
+# 외부 프로젝트에서 입력받을 값들 (필요한 경우)
+inputs:
+  google_api_key:
+    description: 'Google AI Studio API Key'
+    required: true
+  github_token:
+    description: 'GitHub Token'
+    required: true
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile' # 같은 폴더의 Dockerfile을 빌드해서 실행함
+  env:
+    GOOGLE_API_KEY: ${{ inputs.google_api_key }}
+    GITHUB_TOKEN: ${{ inputs.github_token }}
+    # 아래 변수들은 GitHub Actions가 실행 시 자동으로 제공하는 기본 변수들입니다.
+    REPO_NAME: ${{ github.repository }}
+    PR_NUMBER: ${{ github.event.pull_request.number }}
