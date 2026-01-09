@@ -8,27 +8,28 @@ jobs:
   review:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Install UV
         uses: astral-sh/setup-uv@v3
-        
+
       - name: Setup Python
         run: uv python install 3.11
-        
+
       - name: Install dependencies
-        run: uv sync --all-packages # 프로젝트 패키지까지 동기화 시도
-      
+        run: uv sync --all-packages
+
       - name: Check Structure (Debugging)
-      run: |
-        pwd
-        ls -R src/
-      
+        run: |
+          pwd
+          ls -R src/
+
       - name: Run AI Review
-      env:
-        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        REPO_NAME: ${{ github.repository }}
-        PR_NUMBER: ${{ github.event.pull_request.number }}
-        PYTHONPATH: ${{ github.workspace }}/src
-      run: uv run python src/reviewer/main.py
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_NAME: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PYTHONPATH: ${{ github.workspace }}/src
+        run: uv run python src/reviewer/main.py
