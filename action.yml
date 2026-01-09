@@ -22,6 +22,6 @@ runs:
   image: 'Dockerfile'
   env:
     GOOGLE_API_KEY: ${{ inputs.google_api_key }}
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # (또는 inputs.github_token)
+    GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
     REPO_NAME: ${{ inputs.repo_name }}
     PR_NUMBER: ${{ inputs.pr_number }}
