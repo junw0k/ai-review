@@ -10,11 +10,9 @@ if src_dir not in sys.path:
     sys.path.insert(0, src_dir)
 
 
-from dotenv import load_dotenv
 from reviewer.github_client import get_pr_diff, post_comment
 from reviewer.ai_reviewer import review_code
 
-load_dotenv()
 def main():
     # GitHub Actions에서 주입해주는 환경변수
     repo_name = os.getenv("REPO_NAME")
