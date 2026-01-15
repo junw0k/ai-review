@@ -1,23 +1,29 @@
 import os
+
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
 
-def review_code_with_langchain(code: str) -> str:
-    # 1. 모델 설정 (온도를 낮춰 일관된 리뷰 유도)
+from reviewer.prompts import HUMAN_PROMPT_TEMPLATE, SYSTEM_PROMPT
+
+
+def _build_chain() -> ChatPromptTemplate:
+    """LangChain 체인을 구성해 재사용."""
+    model_name = os.getenv("GOOGLE_MODEL", "gemini-3-flash-preview")
+    temperature = float(os.getenv("GOOGLE_TEMPERATURE", "0.1"))
     llm = ChatGoogleGenerativeAI(
-        model="gemini-3-flash-preview",
-        temperature=0.1
+        model=model_name,
+        temperature=temperature,
     )
+    prompt = ChatPromptTemplate.from_messages(
+        [("system", SYSTEM_PROMPT), ("human", HUMAN_PROMPT_TEMPLATE)]
+    )
+    return prompt | llm | StrOutputParser()
 
-    # 2. 프롬프트 템플릿 정의
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", "당신은 숙련된 코드 리뷰어입니다. 한국어로 친절하고 전문적으로 답변하세요."),
-        ("human", "다음 코드의 변경 사항을 리뷰하고 개선점을 제안해 주세요:\n\n{code}")
-    ])
 
-    # 3. 체인(Chain) 구성: 프롬프트 -> 모델 -> 출력 파서
-    chain = prompt | llm | StrOutputParser()
-
-    # 4. 실행 및 결과 반환
-    return chain.invoke({"code": code})
+def review_code_with_langchain(code_diff: str) -> str:
+    """LangChain 기반 코드 리뷰."""
+    if not os.getenv("GOOGLE_API_KEY"):
+        raise RuntimeError("GOOGLE_API_KEY 환경변수가 설정되지 않았습니다.")
+    chain = _build_chain()
+    return chain.invoke({"code": code_diff}).strip()

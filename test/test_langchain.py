@@ -1,36 +1,40 @@
-import sys
 import os
+import sys
 from pathlib import Path
-from dotenv import load_dotenv
+from unittest import TestCase, mock
 
-load_dotenv()
+# src 경로 추가
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SRC_DIR = PROJECT_ROOT / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
 
-# 1. 현재 파일(test_langchain.py)의 부모의 부모인 프로젝트 루트를 찾음
-current_dir = Path(__file__).resolve().parent
-project_root = current_dir.parent
-src_dir = project_root / "src"
+from reviewer import langchain_reviewer  # noqa: E402
 
-# 2. 'src' 폴더를 파이썬 경로에 추가 (이게 핵심입니다!)
-if str(src_dir) not in sys.path:
-    sys.path.insert(0, str(src_dir))
 
-# 3. 이제 'src.' 없이 'reviewer'로 시작하는 임포트가 가능해집니다.
-try:
-    from reviewer.langchain_reviewer import review_code_with_langchain
-    print("✅ 모듈 임포트 성공!")
-except ImportError as e:
-    print(f"❌ 임포트 실패: {e}")
-    print(f"현재 sys.path: {sys.path}")
-    sys.exit(1)
+class LangChainReviewerTest(TestCase):
+    def setUp(self) -> None:
+        self._original_key = os.environ.get("GOOGLE_API_KEY")
+        os.environ["GOOGLE_API_KEY"] = "dummy-key"
 
-def run_test():
-    test_code = "def hello(): print('world')"
-    print("--- 🚀 LangChain CLI 테스트 시작 ---")
-    try:
-        result = review_code_with_langchain(test_code)
-        print(f"AI 응답:\n{result}")
-    except Exception as e:
-        print(f"❌ 오류 발생: {e}")
+    def tearDown(self) -> None:
+        if self._original_key is None:
+            os.environ.pop("GOOGLE_API_KEY", None)
+        else:
+            os.environ["GOOGLE_API_KEY"] = self._original_key
 
-if __name__ == "__main__":
-    run_test()
+    def test_review_code_with_langchain_invokes_chain(self):
+        fake_chain = mock.Mock()
+        fake_chain.invoke.return_value = " 결과 "
+        with mock.patch.object(
+            langchain_reviewer, "_build_chain", return_value=fake_chain
+        ):
+            output = langchain_reviewer.review_code_with_langchain("diff")
+
+        fake_chain.invoke.assert_called_once_with({"code": "diff"})
+        self.assertEqual(output, "결과")
+
+    def test_review_code_with_langchain_requires_api_key(self):
+        os.environ.pop("GOOGLE_API_KEY", None)
+        with self.assertRaises(RuntimeError):
+            langchain_reviewer.review_code_with_langchain("diff")
